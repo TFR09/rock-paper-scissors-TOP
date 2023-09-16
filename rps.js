@@ -1,13 +1,18 @@
+let pScore = 0;
+let cScore = 0
+let compScore = document.querySelector(".computer-score")
+let playerScore = document.querySelector(".your-score")
+const buttons = document.querySelectorAll(".container > button")
+
 function getComputerChoice(){
     let num = Math.floor(Math.random() * 3) + 1
     switch (num) {
         case 1:
-            return "scissors"
+            return "Scissors"
         case 2:
-            return "rock"
+            return "Rock"
         case 3:
-            return "paper"
-
+            return "Paper"
     }
 }
 
@@ -19,39 +24,67 @@ function playRound(playerSelection, computerSelection) {
     let player = playerSelection.toLowerCase()
     let computer = computerSelection.toLowerCase()
 
+    document.querySelector(".computer-choice").innerHTML = `The computer chose ${computerSelection}!`;
+
     let playerWins = (player === 'rock' && computer === 'scissors') || (player === 'scissors' && computer === 'paper') ||
     (player === 'paper' && computer === 'rock');
     
+    const result = document.querySelector(".result");
     
     if (player === computer) {
-        return "It's a Draw!"
+        return result.innerHTML = "It's a Draw!"
     }
     else if (playerWins) {
-        return `You Won! ${capitalize(player)} beats ${capitalize(computer)}!`
+        pScore++
+        playerScore.innerHTML = `You : ${pScore}`;
+        return result.innerHTML = `${capitalize(player)} beats ${capitalize(computer)}!`
     }
     else {
-        return `You Lost! ${capitalize(player)} is beaten by ${capitalize(computer)}!`
+        cScore++
+        compScore.innerHTML = `Computer : ${cScore}`;
+        return result.innerHTML = `${capitalize(player)} is beaten by ${capitalize(computer)}!`
     }
 }
 
-function game() {
-    let playerWins = 0
-    let computerWins = 0
-
-    for (let i = 0; i < 5; i++) {
-        let playerSelection = prompt("Pick your Weapon: Rock, Paper or Scissors", "Rock")
-        let computerSelection = getComputerChoice()
-        let result = playRound(playerSelection, computerSelection)
-        
-        if (result.startsWith("You Won!")) playerWins++;
-        else if (result.startsWith("You Lost!")) computerWins++;
-    }
-
-    let winner = playerWins > computerWins ? "Player" : playerWins < computerWins ? "Computer" : "No one";
-    console.log(`${winner} Wins!`)
-    console.log(`Player won ${playerWins} rounds!`)
-    console.log(`Computer won ${computerWins} rounds!`)
-    if (winner === "No one") console.log("It's a Draw!");
+function reset() {
+    pScore = 0
+    cScore = 0
+    playerScore.innerHTML = "You : 0";
+    compScore.innerHTML = "Computer : 0";
+    document.querySelector(".result").innerHTML = "";
+    document.querySelector(".computer-choice").innerHTML = "";
+    document.querySelector(".final-result").innerHTML = "";
+    const resetBtn = document.querySelector(".reset-btn");
+    resetBtn.removeChild(resetBtn.firstChild)
+    buttons.forEach(button => button.addEventListener("click", play))
 }
 
-game()
+function gameOver() {
+    return pScore === 5 || cScore === 5;
+}
+
+function play() {
+    let player = this.value
+    let computer = getComputerChoice()
+    playRound(player, computer)
+    let end = gameOver()
+
+    if (end) {
+        buttons.forEach(button => button.removeEventListener("click", play))
+        let winner = pScore === 5 ? "Player" : "Computer";
+        let finalResult = document.querySelector(".final-result");
+        if (winner === "Player") {
+            finalResult.innerHTML = "You have Conquered the Machines!";
+        } 
+        else {
+            finalResult.innerHTML = "The Machines have Won!";
+        }
+        const resetBtn = document.createElement("button");
+        resetBtn.innerHTML = "Try Again?";
+        resetBtn.onclick = reset;
+        const resetCon = document.querySelector(".reset-btn");
+        resetCon.appendChild(resetBtn);
+    }
+}
+
+buttons.forEach(button => button.addEventListener("click", play))
